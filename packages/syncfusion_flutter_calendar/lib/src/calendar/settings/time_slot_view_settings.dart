@@ -57,23 +57,24 @@ class TimeSlotViewSettings with Diagnosticable {
   /// Creates a timeslot view settings for calendar.
   ///
   /// The properties allows to customize the timeslot views of [SfCalendar].
-  const TimeSlotViewSettings(
-      {this.startHour = 0,
-      this.endHour = 24,
-      this.nonWorkingDays = const <int>[DateTime.saturday, DateTime.sunday],
-      this.timeFormat = 'h a',
-      this.timeInterval = const Duration(minutes: 60),
-      this.timeIntervalHeight = 40,
-      this.timeIntervalWidth = -2,
-      this.timelineAppointmentHeight = -1,
-      this.minimumAppointmentDuration,
-      this.dateFormat = 'd',
-      this.dayFormat = 'EE',
-      this.timeRulerSize = -1,
-      this.timeTextStyle,
-      this.allDayPanelColor,
-      this.numberOfDaysInView = -1})
-      : assert(startHour >= 0 && startHour <= 24),
+  const TimeSlotViewSettings({
+    this.startHour = 0,
+    this.endHour = 24,
+    this.nonWorkingDays = const <int>[DateTime.saturday, DateTime.sunday],
+    this.timeFormat = 'h a',
+    this.timeInterval = const Duration(minutes: 60),
+    this.timeIntervalHeight = 40,
+    this.timeIntervalWidth = -2,
+    this.timelineAppointmentHeight = -1,
+    this.minimumAppointmentDuration,
+    this.dateFormat = 'd',
+    this.dayFormat = 'EE',
+    this.timeRulerSize = -1,
+    this.timeTextStyle,
+    this.allDayPanelColor,
+    this.numberOfDaysInView = -1,
+    this.timeRulerStyleCallback,
+  })  : assert(startHour >= 0 && startHour <= 24),
         assert(endHour >= 0 && endHour <= 24),
         assert(timeIntervalHeight >= -1),
         assert(timeIntervalWidth >= -2),
@@ -692,6 +693,22 @@ class TimeSlotViewSettings with Diagnosticable {
   ///  ```
   final int numberOfDaysInView;
 
+  /// Callback to customize the style of time ruler labels based on time.
+  ///
+  /// This allows for conditional styling of time ruler labels. For example,
+  /// highlighting specific hours or time ranges with different background colors.
+  ///
+  /// ```dart
+  /// timeRulerStyleCallback: (hour, minute) {
+  ///   // Highlight the 8:00 - 9:00 time range with light green
+  ///   if (hour == 8) {
+  ///     return TimeRulerStyle(backgroundColor: Colors.lightGreen.withOpacity(0.2));
+  ///   }
+  ///   return TimeRulerStyle();
+  /// }
+  /// ```
+  final TimeRulerStyleCallback? timeRulerStyleCallback;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -717,24 +734,23 @@ class TimeSlotViewSettings with Diagnosticable {
         otherStyle.dateFormat == dateFormat &&
         otherStyle.dayFormat == dayFormat &&
         otherStyle.timeRulerSize == timeRulerSize &&
-        otherStyle.timeTextStyle == timeTextStyle;
+        otherStyle.timeTextStyle == timeTextStyle &&
+        otherStyle.timeRulerStyleCallback == timeRulerStyleCallback;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<TextStyle>('timeTextStyle', timeTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('timeTextStyle', timeTextStyle));
     properties.add(DoubleProperty('startHour', startHour));
     properties.add(DoubleProperty('endHour', endHour));
     properties.add(IterableProperty<int>('nonWorkingDays', nonWorkingDays));
     properties.add(DiagnosticsProperty<Duration>('timeInterval', timeInterval));
     properties.add(DoubleProperty('timeIntervalHeight', timeIntervalHeight));
     properties.add(DoubleProperty('timeIntervalWidth', timeIntervalWidth));
+    properties.add(DoubleProperty('timelineAppointmentHeight', timelineAppointmentHeight));
     properties.add(
-        DoubleProperty('timelineAppointmentHeight', timelineAppointmentHeight));
-    properties.add(DiagnosticsProperty<Duration>(
-        'minimumAppointmentDuration', minimumAppointmentDuration));
+        DiagnosticsProperty<Duration>('minimumAppointmentDuration', minimumAppointmentDuration));
     properties.add(DoubleProperty('timeRulerSize', timeRulerSize));
     properties.add(StringProperty('timeFormat', timeFormat));
     properties.add(StringProperty('dateFormat', dateFormat));
@@ -759,4 +775,27 @@ class TimeSlotViewSettings with Diagnosticable {
         timeRulerSize,
         timeTextStyle);
   }
+}
+
+/// Callback that determines the style for time ruler labels
+typedef TimeRulerStyleCallback = TimeRulerStyle Function(int hour, int minute);
+
+/// Defines the style for a time ruler cell
+class TimeRulerStyle {
+  /// Creates a time ruler style.
+  const TimeRulerStyle({
+    this.backgroundColor = Colors.transparent,
+    this.textColor,
+  });
+
+  /// The background color of the time ruler label.
+  ///
+  /// This allows customizing the background color of specific time labels
+  /// in the time ruler.
+  final Color backgroundColor;
+
+  /// The text color of the time ruler label.
+  ///
+  /// If null, the default text color defined by [timeTextStyle] will be used.
+  final Color? textColor;
 }
