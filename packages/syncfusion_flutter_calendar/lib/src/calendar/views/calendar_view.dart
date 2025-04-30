@@ -7682,74 +7682,96 @@ class _CalendarViewState extends State<_CalendarView> with TickerProviderStateMi
           ),
         ),
         Positioned(
-            top: isDayView
-                ? viewHeaderHeight + allDayExpanderHeight
-                : viewHeaderHeight + _allDayHeight + allDayExpanderHeight,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Scrollbar(
+          top: isDayView
+              ? viewHeaderHeight + allDayExpanderHeight
+              : viewHeaderHeight + _allDayHeight + allDayExpanderHeight,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: !widget.isMobilePlatform,
+            child: ListView(
+              padding: EdgeInsets.zero,
               controller: _scrollController,
-              thumbVisibility: !widget.isMobilePlatform,
-              child: ListView(
-                  padding: EdgeInsets.zero,
-                  controller: _scrollController,
-                  physics: const ClampingScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
+              children: <Widget>[
+                Stack(
                   children: <Widget>[
-                    Stack(children: <Widget>[
-                      RepaintBoundary(
-                          child: _CalendarMultiChildContainer(
-                              width: width,
-                              height: height,
-                              children: <Widget>[
-                            RepaintBoundary(
-                              child: TimeSlotWidget(
-                                  widget.visibleDates,
-                                  _horizontalLinesCount!,
-                                  _timeIntervalHeight,
-                                  timeLabelWidth,
-                                  widget.calendar.cellBorderColor,
-                                  widget.calendarTheme,
-                                  widget.themeData,
-                                  widget.calendar.timeSlotViewSettings,
-                                  isRTL,
-                                  widget.regions,
-                                  _calendarCellNotifier,
-                                  widget.textScaleFactor,
-                                  widget.calendar.timeRegionBuilder,
-                                  width,
-                                  height,
-                                  widget.calendar.minDate,
-                                  widget.calendar.maxDate),
-                            ),
-                            RepaintBoundary(child: _addAppointmentPainter(width, height)),
-                          ])),
-                      RepaintBoundary(
-                        child: CustomPaint(
-                          painter: _TimeRulerView(
-                              _horizontalLinesCount!,
-                              _timeIntervalHeight,
-                              widget.calendar.timeSlotViewSettings,
-                              widget.calendar.cellBorderColor,
-                              isRTL,
-                              widget.locale,
-                              widget.calendarTheme,
-                              CalendarViewHelper.isTimelineView(widget.view),
-                              widget.visibleDates,
-                              widget.textScaleFactor),
-                          size: Size(timeLabelWidth, height),
-                        ),
+                    RepaintBoundary(
+                      child: _CalendarMultiChildContainer(
+                        width: width,
+                        height: height,
+                        children: <Widget>[
+                          RepaintBoundary(
+                            child: TimeSlotWidget(
+                                widget.visibleDates,
+                                _horizontalLinesCount!,
+                                _timeIntervalHeight,
+                                timeLabelWidth,
+                                widget.calendar.cellBorderColor,
+                                widget.calendarTheme,
+                                widget.themeData,
+                                widget.calendar.timeSlotViewSettings,
+                                isRTL,
+                                widget.regions,
+                                _calendarCellNotifier,
+                                widget.textScaleFactor,
+                                widget.calendar.timeRegionBuilder,
+                                width,
+                                height,
+                                widget.calendar.minDate,
+                                widget.calendar.maxDate),
+                          ),
+                          RepaintBoundary(child: _addAppointmentPainter(width, height)),
+                        ],
                       ),
-                      RepaintBoundary(
-                        child: CustomPaint(
-                          painter: _addSelectionView(),
-                          size: Size(width, height),
+                    ),
+                    /* RepaintBoundary(
+                      child: CustomPaint(
+                        painter: _TimeRulerView(
+                          _horizontalLinesCount!,
+                          _timeIntervalHeight,
+                          widget.calendar.timeSlotViewSettings,
+                          widget.calendar.cellBorderColor,
+                          isRTL,
+                          widget.locale,
+                          widget.calendarTheme,
+                          CalendarViewHelper.isTimelineView(widget.view),
+                          widget.visibleDates,
+                          widget.textScaleFactor,
                         ),
+                        size: Size(timeLabelWidth, height),
                       ),
-                      _getCurrentTimeIndicator(timeLabelWidth, width, height, false),
-                    ])
-                  ]),
-            )),
+                    ), */
+                    RepaintBoundary(
+                      child: TimeRulerGestureDetector(
+                        horizontalLinesCount: _horizontalLinesCount!,
+                        timeIntervalHeight: _timeIntervalHeight,
+                        timeSlotViewSettings: widget.calendar.timeSlotViewSettings,
+                        cellBorderColor: widget.calendar.cellBorderColor,
+                        isRTL: isRTL,
+                        locale: widget.locale,
+                        calendarTheme: widget.calendarTheme,
+                        isTimelineView: CalendarViewHelper.isTimelineView(widget.view),
+                        visibleDates: widget.visibleDates,
+                        textScaleFactor: widget.textScaleFactor,
+                        size: Size(timeLabelWidth, height),
+                      ),
+                    ),
+                    RepaintBoundary(
+                      child: CustomPaint(
+                        painter: _addSelectionView(),
+                        size: Size(width, height),
+                      ),
+                    ),
+                    _getCurrentTimeIndicator(timeLabelWidth, width, height, false),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -7830,36 +7852,70 @@ class _CalendarViewState extends State<_CalendarView> with TickerProviderStateMi
           child: _getTimelineViewHeader(width, viewHeaderHeight, widget.locale),
         ),
       ),
-      Positioned(
-          top: viewHeaderHeight,
-          left: 0,
-          right: 0,
-          height: timeLabelSize,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            controller: _timelineRulerController,
-            scrollDirection: Axis.horizontal,
-            physics: widget.isMobilePlatform
-                ? const _CustomNeverScrollableScrollPhysics()
-                : const ClampingScrollPhysics(),
-            children: <Widget>[
-              RepaintBoundary(
-                  child: CustomPaint(
+      /* Positioned(
+        top: viewHeaderHeight,
+        left: 0,
+        right: 0,
+        height: timeLabelSize,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          controller: _timelineRulerController,
+          scrollDirection: Axis.horizontal,
+          physics: widget.isMobilePlatform
+              ? const _CustomNeverScrollableScrollPhysics()
+              : const ClampingScrollPhysics(),
+          children: <Widget>[
+            RepaintBoundary(
+              child: CustomPaint(
                 painter: _TimeRulerView(
-                    _horizontalLinesCount!,
-                    _timeIntervalHeight,
-                    widget.calendar.timeSlotViewSettings,
-                    widget.calendar.cellBorderColor,
-                    _isRTL,
-                    locale,
-                    widget.calendarTheme,
-                    CalendarViewHelper.isTimelineView(widget.view),
-                    widget.visibleDates,
-                    widget.textScaleFactor),
+                  _horizontalLinesCount!,
+                  _timeIntervalHeight,
+                  widget.calendar.timeSlotViewSettings,
+                  widget.calendar.cellBorderColor,
+                  _isRTL,
+                  locale,
+                  widget.calendarTheme,
+                  CalendarViewHelper.isTimelineView(widget.view),
+                  widget.visibleDates,
+                  widget.textScaleFactor,
+                ),
                 size: Size(width, timeLabelSize),
-              )),
-            ],
-          )),
+              ),
+            ),
+          ],
+        ),
+      ), */
+      Positioned(
+        top: viewHeaderHeight,
+        left: 0,
+        right: 0,
+        height: timeLabelSize,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          controller: _timelineRulerController,
+          scrollDirection: Axis.horizontal,
+          physics: widget.isMobilePlatform
+              ? const _CustomNeverScrollableScrollPhysics()
+              : const ClampingScrollPhysics(),
+          children: <Widget>[
+            RepaintBoundary(
+              child: TimeRulerGestureDetector(
+                horizontalLinesCount: _horizontalLinesCount!,
+                timeIntervalHeight: _timeIntervalHeight,
+                timeSlotViewSettings: widget.calendar.timeSlotViewSettings,
+                cellBorderColor: widget.calendar.cellBorderColor,
+                isRTL: _isRTL,
+                locale: locale,
+                calendarTheme: widget.calendarTheme,
+                isTimelineView: CalendarViewHelper.isTimelineView(widget.view),
+                visibleDates: widget.visibleDates,
+                textScaleFactor: widget.textScaleFactor,
+                size: Size(width, timeLabelSize),
+              ),
+            ),
+          ],
+        ),
+      ),
       Positioned(
           top: viewHeaderHeight + timeLabelSize,
           left: 0,
@@ -11144,7 +11200,7 @@ class _SelectionPainter extends CustomPainter {
   }
 }
 
-class _TimeRulerView extends CustomPainter {
+/* class _TimeRulerView extends CustomPainter {
   _TimeRulerView(
       this.horizontalLinesCount,
       this.timeIntervalHeight,
@@ -11213,90 +11269,8 @@ class _TimeRulerView extends CustomPainter {
     }
   }
 
-  /* /// Draws the time labels in the time label view for timeslot views in
+  /// Draws the time labels in the time label view for timeslot views in
   /// calendar.
-  void _drawTimeLabels(
-    Canvas canvas,
-    Size size,
-    DateTime date,
-    double hour,
-    double xPosition,
-    double yPosition,
-    TextStyle timeTextStyle,
-  ) {
-    const int padding = 5;
-    final int timeInterval = CalendarViewHelper.getTimeInterval(timeSlotViewSettings);
-
-    final List<String> timeFormatStrings =
-        CalendarViewHelper.getListFromString(timeSlotViewSettings.timeFormat);
-
-    /// For timeline view we will draw 24 lines where as in day, week and work
-    /// week view we will draw 23 lines excluding the 12 AM, hence to rectify
-    /// this the i value handled accordingly.
-    for (int i = isTimelineView ? 0 : 1;
-        i <= (isTimelineView ? horizontalLinesCount - 1 : horizontalLinesCount);
-        i++) {
-      if (isTimelineView) {
-        canvas.save();
-        canvas.clipRect(Rect.fromLTWH(xPosition, 0, timeIntervalHeight, size.height));
-        canvas.restore();
-        canvas.drawLine(Offset(xPosition, 0), Offset(xPosition, size.height), _linePainter);
-      }
-
-      final double minute = (i * timeInterval) + hour;
-      date = DateTime(
-          date.year, date.month, date.day, timeSlotViewSettings.startHour.toInt(), minute.toInt());
-      final String time = CalendarViewHelper.getLocalizedString(date, timeFormatStrings, locale);
-
-      final TextSpan span = TextSpan(
-        text: time,
-        style: timeTextStyle,
-      );
-
-      final double cellWidth = isTimelineView ? timeIntervalHeight : size.width;
-
-      _textPainter.text = span;
-      _textPainter.layout(maxWidth: cellWidth);
-      if (isTimelineView && _textPainter.height > size.height) {
-        return;
-      }
-
-      double startXPosition = (cellWidth - _textPainter.width) / 2;
-      if (startXPosition < 0) {
-        startXPosition = 0;
-      }
-
-      if (isTimelineView) {
-        startXPosition = isRTL ? xPosition - _textPainter.width : xPosition;
-      }
-
-      double startYPosition = yPosition - (_textPainter.height / 2);
-
-      if (isTimelineView) {
-        startYPosition = (size.height - _textPainter.height) / 2;
-        startXPosition = isRTL ? startXPosition - padding : startXPosition + padding;
-      }
-
-      _textPainter.paint(canvas, Offset(startXPosition, startYPosition));
-
-      if (!isTimelineView) {
-        final Offset start = Offset(isRTL ? 0 : size.width - (startXPosition / 2), yPosition);
-        final Offset end = Offset(isRTL ? startXPosition / 2 : size.width, yPosition);
-        canvas.drawLine(start, end, _linePainter);
-        yPosition += timeIntervalHeight;
-        if (yPosition.round() == size.height.round()) {
-          break;
-        }
-      } else {
-        if (isRTL) {
-          xPosition -= timeIntervalHeight;
-        } else {
-          xPosition += timeIntervalHeight;
-        }
-      }
-    }
-  } */
-
   void _drawTimeLabels(
     Canvas canvas,
     Size size,
@@ -11419,6 +11393,364 @@ class _TimeRulerView extends CustomPainter {
         oldWidget.visibleDates != visibleDates ||
         oldWidget.isTimelineView != isTimelineView ||
         oldWidget.textScaleFactor != textScaleFactor;
+  }
+} */
+
+class _TimeRulerView extends CustomPainter {
+  _TimeRulerView(
+    this.horizontalLinesCount,
+    this.timeIntervalHeight,
+    this.timeSlotViewSettings,
+    this.cellBorderColor,
+    this.isRTL,
+    this.locale,
+    this.calendarTheme,
+    this.isTimelineView,
+    this.visibleDates,
+    this.textScaleFactor,
+  );
+
+  final double horizontalLinesCount;
+  final double timeIntervalHeight;
+  final TimeSlotViewSettings timeSlotViewSettings;
+  final bool isRTL;
+  final String locale;
+  final SfCalendarThemeData calendarTheme;
+  final Color? cellBorderColor;
+  final bool isTimelineView;
+  final List<DateTime> visibleDates;
+  final double textScaleFactor;
+  final Paint _linePainter = Paint();
+  final TextPainter _textPainter = TextPainter();
+
+  // Add a list to track label positions for hit testing
+  final List<TimeRulerLabelInfo> labelPositions = <TimeRulerLabelInfo>[];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Clear previous label positions
+    labelPositions.clear();
+
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    const double offset = 0.5;
+    double xPosition, yPosition;
+    DateTime date = visibleDates[0];
+
+    xPosition = isRTL && isTimelineView ? size.width : 0;
+    yPosition = timeIntervalHeight;
+    _linePainter.strokeWidth = offset;
+    _linePainter.color = cellBorderColor ?? calendarTheme.cellBorderColor!;
+
+    if (!isTimelineView) {
+      final double lineXPosition = isRTL ? offset : size.width - offset;
+      // Draw vertical time label line
+      canvas.drawLine(Offset(lineXPosition, 0), Offset(lineXPosition, size.height), _linePainter);
+    }
+
+    _textPainter.textDirection = CalendarViewHelper.getTextDirectionBasedOnLocale(locale);
+    _textPainter.textWidthBasis = TextWidthBasis.longestLine;
+    _textPainter.textScaler = TextScaler.linear(textScaleFactor);
+
+    final TextStyle timeTextStyle = calendarTheme.timeTextStyle!;
+
+    final double hour =
+        (timeSlotViewSettings.startHour - timeSlotViewSettings.startHour.toInt()) * 60;
+    if (isTimelineView) {
+      canvas.drawLine(Offset.zero, Offset(size.width, 0), _linePainter);
+      final double timelineViewWidth = timeIntervalHeight * horizontalLinesCount;
+      for (int i = 0; i < visibleDates.length; i++) {
+        date = visibleDates[i];
+        _drawTimeLabels(canvas, size, date, hour, xPosition, yPosition, timeTextStyle);
+        if (isRTL) {
+          xPosition -= timelineViewWidth;
+        } else {
+          xPosition += timelineViewWidth;
+        }
+      }
+    } else {
+      _drawTimeLabels(canvas, size, date, hour, xPosition, yPosition, timeTextStyle);
+    }
+  }
+
+  /// Draws the time labels in the time label view for timeslot views in
+  /// calendar.
+  void _drawTimeLabels(
+    Canvas canvas,
+    Size size,
+    DateTime date,
+    double hour,
+    double xPosition,
+    double yPosition,
+    TextStyle timeTextStyle,
+  ) {
+    const int padding = 5;
+    final int timeInterval = CalendarViewHelper.getTimeInterval(timeSlotViewSettings);
+    final Paint backgroundPainter = Paint()..style = PaintingStyle.fill;
+
+    final List<String> timeFormatStrings =
+        CalendarViewHelper.getListFromString(timeSlotViewSettings.timeFormat);
+
+    /// For timeline view we will draw 24 lines where as in day, week and work
+    /// week view we will draw 23 lines excluding the 12 AM, hence to rectify
+    /// this the i value handled accordingly.
+    for (int i = isTimelineView ? 0 : 1;
+        i <= (isTimelineView ? horizontalLinesCount - 1 : horizontalLinesCount);
+        i++) {
+      if (isTimelineView) {
+        canvas.save();
+        canvas.clipRect(Rect.fromLTWH(xPosition, 0, timeIntervalHeight, size.height));
+        canvas.restore();
+        canvas.drawLine(Offset(xPosition, 0), Offset(xPosition, size.height), _linePainter);
+      }
+
+      final double minute = (i * timeInterval) + hour;
+      date = DateTime(
+          date.year, date.month, date.day, timeSlotViewSettings.startHour.toInt(), minute.toInt());
+
+      // Check for custom styling from callback
+      TimeRulerStyle? rulerStyle;
+      if (timeSlotViewSettings.timeRulerStyleCallback != null) {
+        rulerStyle = timeSlotViewSettings.timeRulerStyleCallback!(date.hour, date.minute);
+      }
+
+      // Apply custom text color if provided
+      TextStyle actualTimeTextStyle = timeTextStyle;
+      if (rulerStyle != null && rulerStyle.textColor != null) {
+        actualTimeTextStyle = timeTextStyle.copyWith(color: rulerStyle.textColor);
+      }
+
+      final String time = CalendarViewHelper.getLocalizedString(date, timeFormatStrings, locale);
+
+      final TextSpan span = TextSpan(
+        text: time,
+        style: actualTimeTextStyle,
+      );
+
+      final double cellWidth = isTimelineView ? timeIntervalHeight : size.width;
+
+      _textPainter.text = span;
+      _textPainter.layout(maxWidth: cellWidth);
+      if (isTimelineView && _textPainter.height > size.height) {
+        return;
+      }
+
+      double startXPosition = (cellWidth - _textPainter.width) / 2;
+      if (startXPosition < 0) {
+        startXPosition = 0;
+      }
+
+      if (isTimelineView) {
+        startXPosition = isRTL ? xPosition - _textPainter.width : xPosition;
+      }
+
+      double startYPosition = yPosition - (_textPainter.height / 2);
+
+      if (isTimelineView) {
+        startYPosition = (size.height - _textPainter.height) / 2;
+        startXPosition = isRTL ? startXPosition - padding : startXPosition + padding;
+      }
+
+      // Define hit-test rectangle area for this time slot
+      final Rect hitTestRect = isTimelineView
+          ? Rect.fromLTRB(xPosition, 0,
+              isRTL ? xPosition - timeIntervalHeight : xPosition + timeIntervalHeight, size.height)
+          : Rect.fromLTRB(0, yPosition - timeIntervalHeight / 2, size.width,
+              yPosition + timeIntervalHeight / 2);
+
+      // Store time label info for hit testing
+      labelPositions.add(TimeRulerLabelInfo(
+        hour: date.hour,
+        minute: date.minute,
+        bounds: hitTestRect,
+      ));
+
+      // Draw background if a custom background color is provided
+      if (rulerStyle != null && rulerStyle.backgroundColor != Colors.transparent) {
+        backgroundPainter.color = rulerStyle.backgroundColor;
+        canvas.drawRect(hitTestRect, backgroundPainter);
+      }
+
+      _textPainter.paint(canvas, Offset(startXPosition, startYPosition));
+
+      if (!isTimelineView) {
+        final Offset start = Offset(isRTL ? 0 : size.width - (startXPosition / 2), yPosition);
+        final Offset end = Offset(isRTL ? startXPosition / 2 : size.width, yPosition);
+        canvas.drawLine(start, end, _linePainter);
+        yPosition += timeIntervalHeight;
+        if (yPosition.round() == size.height.round()) {
+          break;
+        }
+      } else {
+        if (isRTL) {
+          xPosition -= timeIntervalHeight;
+        } else {
+          xPosition += timeIntervalHeight;
+        }
+      }
+    }
+  }
+
+  @override
+  bool hitTest(Offset position) {
+    // The default implementation checks if the point is within the painted area
+    // We just need to return true if any label contains this position
+    for (final TimeRulerLabelInfo labelInfo in labelPositions) {
+      if (labelInfo.bounds.contains(position)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Rename our custom hit test method to avoid the conflict
+  TimeRulerLabelInfo? getHitTimeLabel(Offset position) {
+    for (final TimeRulerLabelInfo labelInfo in labelPositions) {
+      if (labelInfo.bounds.contains(position)) {
+        return labelInfo;
+      }
+    }
+    return null;
+  }
+
+  @override
+  bool shouldRepaint(_TimeRulerView oldDelegate) {
+    final _TimeRulerView oldWidget = oldDelegate;
+    return oldWidget.timeSlotViewSettings != timeSlotViewSettings ||
+        oldWidget.cellBorderColor != cellBorderColor ||
+        oldWidget.calendarTheme != calendarTheme ||
+        oldWidget.isRTL != isRTL ||
+        oldWidget.locale != locale ||
+        oldWidget.visibleDates != visibleDates ||
+        oldWidget.isTimelineView != isTimelineView ||
+        oldWidget.textScaleFactor != textScaleFactor;
+  }
+}
+
+/// Class to store time ruler label information for hit testing
+class TimeRulerLabelInfo {
+  /// Creates a [TimeRulerLabelInfo] with hour, minute and bounds information
+  const TimeRulerLabelInfo({
+    required this.hour,
+    required this.minute,
+    required this.bounds,
+  });
+
+  /// The hour value of this time slot
+  final int hour;
+
+  /// The minute value of this time slot
+  final int minute;
+
+  /// The bounds rectangle of this time slot
+  final Rect bounds;
+}
+
+/* class _TimeRulerLabelPosition {
+  final int hour;
+  final int minute;
+  final Rect bounds;
+  
+  const _TimeRulerLabelPosition(this.hour, this.minute, this.bounds);
+} */
+
+class TimeRulerGestureDetector extends StatefulWidget {
+  const TimeRulerGestureDetector({
+    Key? key,
+    required this.horizontalLinesCount,
+    required this.timeIntervalHeight,
+    required this.timeSlotViewSettings,
+    required this.cellBorderColor,
+    required this.isRTL,
+    required this.locale,
+    required this.calendarTheme,
+    required this.isTimelineView,
+    required this.visibleDates,
+    required this.textScaleFactor,
+    required this.size,
+  }) : super(key: key);
+
+  final double horizontalLinesCount;
+  final double timeIntervalHeight;
+  final TimeSlotViewSettings timeSlotViewSettings;
+  final Color? cellBorderColor;
+  final bool isRTL;
+  final String locale;
+  final SfCalendarThemeData calendarTheme;
+  final bool isTimelineView;
+  final List<DateTime> visibleDates;
+  final double textScaleFactor;
+  final Size size;
+
+  @override
+  State<TimeRulerGestureDetector> createState() => _TimeRulerGestureDetectorState();
+}
+
+class _TimeRulerGestureDetectorState extends State<TimeRulerGestureDetector> {
+  late _TimeRulerView _timeRulerPainter;
+
+  @override
+  void initState() {
+    super.initState();
+    _timeRulerPainter = _createPainter();
+  }
+
+  @override
+  void didUpdateWidget(TimeRulerGestureDetector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.timeSlotViewSettings != widget.timeSlotViewSettings ||
+        oldWidget.cellBorderColor != widget.cellBorderColor ||
+        oldWidget.calendarTheme != widget.calendarTheme ||
+        oldWidget.isRTL != widget.isRTL ||
+        oldWidget.locale != widget.locale ||
+        oldWidget.visibleDates != widget.visibleDates ||
+        oldWidget.isTimelineView != widget.isTimelineView ||
+        oldWidget.textScaleFactor != widget.textScaleFactor) {
+      _timeRulerPainter = _createPainter();
+    }
+  }
+
+  _TimeRulerView _createPainter() {
+    return _TimeRulerView(
+      widget.horizontalLinesCount,
+      widget.timeIntervalHeight,
+      widget.timeSlotViewSettings,
+      widget.cellBorderColor,
+      widget.isRTL,
+      widget.locale,
+      widget.calendarTheme,
+      widget.isTimelineView,
+      widget.visibleDates,
+      widget.textScaleFactor,
+    );
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (widget.timeSlotViewSettings.onTapTimeRuler == null) {
+      return;
+    }
+
+    // Force a repaint to ensure labelPositions are updated
+    setState(() {});
+
+    // Use a post-frame callback to ensure painting is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final TimeRulerLabelInfo? labelInfo =
+          _timeRulerPainter.getHitTimeLabel(details.localPosition);
+      if (labelInfo != null) {
+        widget.timeSlotViewSettings.onTapTimeRuler!(labelInfo.hour, labelInfo.minute);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapUp: _handleTapUp,
+      child: CustomPaint(
+        painter: _timeRulerPainter,
+        size: widget.size,
+      ),
+    );
   }
 }
 

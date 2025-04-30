@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../calendar.dart';
@@ -74,6 +73,7 @@ class TimeSlotViewSettings with Diagnosticable {
     this.allDayPanelColor,
     this.numberOfDaysInView = -1,
     this.timeRulerStyleCallback,
+    this.onTapTimeRuler,
   })  : assert(startHour >= 0 && startHour <= 24),
         assert(endHour >= 0 && endHour <= 24),
         assert(timeIntervalHeight >= -1),
@@ -708,6 +708,9 @@ class TimeSlotViewSettings with Diagnosticable {
   /// }
   /// ```
   final TimeRulerStyleCallback? timeRulerStyleCallback;
+
+  /// Callback that is called when a time ruler label is tapped.
+  final void Function(int hour, int minute)? onTapTimeRuler;
 
   @override
   bool operator ==(Object other) {
